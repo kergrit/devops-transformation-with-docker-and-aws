@@ -1,0 +1,9 @@
+version: "3"
+services:
+    app:
+      image: nginx
+      deploy:
+        replicas: 4
+        placement:
+          constraints:
+            - node.role == worker
