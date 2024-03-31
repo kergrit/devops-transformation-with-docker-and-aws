@@ -2,6 +2,8 @@
 
 In this section we use https://multipass.run/ as vm for demo docker swarm cluster.
 
+refs. https://dev.to/mattdark/docker-swarm-with-virtual-machines-using-multipass-39b0 and update script to present.
+
 ```sh
 #file structure
 .
