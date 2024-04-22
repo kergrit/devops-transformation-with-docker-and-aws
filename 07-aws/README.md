@@ -65,3 +65,79 @@ Bucket Policy (Public Access)
 	]
 }
 ```
+
+### EC2 launce template (lt-whoami)
+```sh
+#!/bin/bash 
+sudo yum update -y
+sudo yum install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -a -G docker $(whoami)
+docker run -d -p 80:80 --name whoami traefik/whoami
+```
+
+### RDS for mariadb
+```sh
+# After EC2 connected install mariadb server utils
+sudo yum install mariadb105-server-utils -y
+
+# Test connection
+mysql -h {$DB_HOST} -u {$DB_USER} -p{$DB_PASSWORD}
+show databases;
+quit;
+```
+
+#### ElatiCash for redis
+```sh
+# After EC2 connected install redis6-cli
+sudo yum install redis6 -y
+
+# Test connection
+redis6-cli -c -h {$REDIS_HOST} -p 6379
+set key1 123
+get key1
+"123"
+```
+
+### CodeCommit
+```sh
+# aws configure with IAM account
+aws configure
+
+# clone repository
+git clone https://git-codecommit.ap-southeast-1.amazonaws.com/v1/repos/hello-world
+
+```
+
+### CodeBuild
+```yaml
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo log in to Amazon ECR...
+      - aws --version
+      - echo $AWS_DEFAULT_REGION
+      - aws configure list      
+      - aws ecr get-login-password --region ap-southeast-1 | docker login --username AWS --password-stdin 229671038351.dkr.ecr.ap-southeast-1.amazonaws.com/ecs-devops-hello-world
+      - REPOSITORY_URI=229671038351.dkr.ecr.ap-southeast-1.amazonaws.com/ecs-devops-hello-world
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}      
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building the Docker image.
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+      - echo write definitions file...
+      - printf '[{"name":"ecs-devops-hello-world","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
+```
