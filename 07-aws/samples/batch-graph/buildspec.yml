@@ -1,0 +1,30 @@
+version: 0.2
+
+batch:
+  fast-fail: false
+  build-graph:
+    - identifier: build1
+      env:
+        variables:
+          BUILD_ID: build1
+      ignore-failure: false
+    - identifier: build2
+      buildspec: build2.yml
+      env:
+        variables:
+          BUILD_ID: build2
+      depend-on:
+        - build1
+    - identifier: build3
+      env:
+        variables:
+          BUILD_ID: build3
+      depend-on:
+        - build1
+        - build2
+
+phases:
+  build:
+    commands:
+      - echo 'Running default build'
+      - echo 'BUILD_ID =' $BUILD_ID

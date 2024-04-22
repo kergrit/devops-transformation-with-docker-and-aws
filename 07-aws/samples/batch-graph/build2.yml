@@ -1,0 +1,8 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+      - printenv
+      - echo 'Running separate buildspec'
+      - echo 'BUILD_ID =' $BUILD_ID

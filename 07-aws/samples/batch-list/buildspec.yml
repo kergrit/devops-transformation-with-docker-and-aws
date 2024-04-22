@@ -1,0 +1,27 @@
+version: 0.2
+
+batch:
+  fast-fail: false
+  build-list:
+    - identifier: build1
+      env:
+        variables:
+          BUILD_ID: build1
+    - identifier: build2
+      buildspec: build2.yml
+      env:
+        variables:
+          BUILD_ID: build2
+
+env:
+  compute-type: BUILD_GENERAL1_SMALL
+
+phases:
+  build:
+    commands:
+      - echo 'Running default build'
+      - echo 'BUILD_ID =' $BUILD_ID
+      - printenv
+      - git status
+      - export CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+      - echo 'CURRENT_BRANCH =' $CURRENT_BRANCH
